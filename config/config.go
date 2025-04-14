@@ -5,17 +5,19 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v3"
 )
 
 type SessionInfo struct {
-	SessionKey string
-	OrgID      string
+	SessionKey string `yaml:"sessionKey"`
+	OrgID      string `yaml:"orgID"`
 }
 
 type SessionRagen struct {
@@ -24,18 +26,18 @@ type SessionRagen struct {
 }
 
 type Config struct {
-	Sessions               []SessionInfo
-	Address                string
-	APIKey                 string
-	Proxy                  string
-	ChatDelete             bool
-	MaxChatHistoryLength   int
-	RetryCount             int
-	NoRolePrefix           bool
-	PromptDisableArtifacts bool
-	EnableMirrorApi        bool
-	MirrorApiPrefix        string
-	RwMutx                 sync.RWMutex
+	Sessions               []SessionInfo `yaml:"sessions"`
+	Address                string        `yaml:"address"`
+	APIKey                 string        `yaml:"apiKey"`
+	Proxy                  string        `yaml:"proxy"`
+	ChatDelete             bool          `yaml:"chatDelete"`
+	MaxChatHistoryLength   int           `yaml:"maxChatHistoryLength"`
+	RetryCount             int           `yaml:"retryCount"`
+	NoRolePrefix           bool          `yaml:"noRolePrefix"`
+	PromptDisableArtifacts bool          `yaml:"promptDisableArtifacts"`
+	EnableMirrorApi        bool          `yaml:"enableMirrorApi"`
+	MirrorApiPrefix        string        `yaml:"mirrorApiPrefix"`
+	RwMutx                 sync.RWMutex  `yaml:"-"` // 不从YAML加载
 }
 
 // 解析 SESSION 格式的环境变量
@@ -100,8 +102,57 @@ func (sr *SessionRagen) NextIndex() int {
 	return index
 }
 
+// 检查配置文件是否存在
+func configFileExists() (bool, string) {
+	execDir := filepath.Dir(os.Args[0])
+	workDir, _ := os.Getwd()
+	if execDir == "" && workDir == "" {
+		logger.Error("Failed to get executable directory")
+		return false, ""
+	}
+
+	var err error
+	exeConfigPath := filepath.Join(execDir, "config.yaml")
+	_, err = os.Stat(exeConfigPath)
+	if !os.IsNotExist(err) {
+		return true, exeConfigPath
+	}
+
+	workConfigPath := filepath.Join(workDir, "config.yaml")
+	_, err = os.Stat(workConfigPath)
+	if !os.IsNotExist(err) {
+		return true, workConfigPath
+	}
+
+	return false, ""
+}
+
+// 从YAML文件加载配置
+func loadConfigFromYAML(configPath string) (*Config, error) {
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file: %v", err)
+	}
+
+	var config Config
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+
+	// 设置读写锁（不从YAML加载）
+	config.RwMutx = sync.RWMutex{}
+
+	// 如果地址为空，使用默认值
+	if config.Address == "" {
+		config.Address = "0.0.0.0:8080"
+	}
+
+	return &config, nil
+}
+
 // 从环境变量加载配置
-func LoadConfig() *Config {
+func loadConfigFromEnv() *Config {
 	maxChatHistoryLength, err := strconv.Atoi(os.Getenv("MAX_CHAT_HISTORY_LENGTH"))
 	if err != nil {
 		maxChatHistoryLength = 10000 // 默认值
@@ -117,7 +168,7 @@ func LoadConfig() *Config {
 		APIKey: os.Getenv("APIKEY"),
 		// 设置代理地址
 		Proxy: os.Getenv("PROXY"),
-		//自动删除聊天
+		// 自动删除聊天
 		ChatDelete: os.Getenv("CHAT_DELETE") != "false",
 		// 设置最大聊天历史长度
 		MaxChatHistoryLength: maxChatHistoryLength,
@@ -131,7 +182,7 @@ func LoadConfig() *Config {
 		EnableMirrorApi: os.Getenv("ENABLE_MIRROR_API") == "true",
 		// 设置镜像API前缀
 		MirrorApiPrefix: os.Getenv("MIRROR_API_PREFIX"),
-		//设置读写锁
+		// 设置读写锁
 		RwMutx: sync.RWMutex{},
 	}
 
@@ -140,6 +191,25 @@ func LoadConfig() *Config {
 		config.Address = "0.0.0.0:8080"
 	}
 	return config
+}
+
+// 加载配置
+func LoadConfig() *Config {
+	// 检查配置文件是否存在
+	exists, configPath := configFileExists()
+	if exists {
+		logger.Info(fmt.Sprintf("Found config file at %s", configPath))
+		config, err := loadConfigFromYAML(configPath)
+		if err == nil {
+			logger.Info("Successfully loaded configuration from YAML file")
+			return config
+		}
+		logger.Error(fmt.Sprintf("Failed to load config from YAML: %v, falling back to environment variables", err))
+	}
+
+	// 如果配置文件不存在或加载失败，从环境变量加载
+	logger.Info("Loading configuration from environment variables")
+	return loadConfigFromEnv()
 }
 
 var ConfigInstance *Config
