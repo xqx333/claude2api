@@ -90,6 +90,39 @@ go build -o claude2api .
 ```
  
  ## ⚙️ 配置
+ 
+### YAML 配置
+
+你可以在应用程序的根目录下使用 config.yaml 文件来配置 Claude2API。如果此文件存在，将会使用它而不是环境变量。
+
+config.yaml 示例：
+
+```yaml
+# Sessions configuration
+sessions:
+  - sessionKey: "sk-ant-sid01-xxxx"
+    orgID: ""
+  - sessionKey: "sk-ant-sid01-yyyy"
+    orgID: ""
+
+# Server address
+address: "0.0.0.0:8080"
+
+# API authentication key
+apiKey: "123"
+
+# Other configuration options...
+chatDelete: true
+maxChatHistoryLength: 10000
+noRolePrefix: false
+promptDisableArtifacts: false
+enableMirrorApi: false
+mirrorApiPrefix: ""
+```
+
+仓库中提供了一个名为 config.yaml.example 的示例配置文件。
+
+ 
  | 环境变量 | 描述 | 默认值 |
  |----------------------|-------------|---------|
  | `SESSIONS` | 逗号分隔的Claude API会话密钥列表 | 必填 |
