@@ -91,15 +91,10 @@ notice: In Hugging Face, /v1 might be blocked, you can use /hf/v1 instead.
 # Clone the repository
 git clone https://github.com/yushangxiao/claude2api.git
 cd claude2api
-
+cp .env.example .env  
+vim .env  
 # Build the binary
 go build -o claude2api .
-
-# Run the service
-export SESSIONS=sk-ant-sid01-xxxx,sk-ant-sid01-yyyy
-export ADDRESS=0.0.0.0:8080
-export APIKEY=123
-……
 
 ./claude2api
 ```
