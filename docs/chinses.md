@@ -77,20 +77,17 @@ Api支持访问格式为 openai 格式
  注意：在Hugging Face中，/v1可能被屏蔽，您可以使用/hf/v1代替。
  
  ### 直接部署
- ```bash
- # 克隆仓库
- git clone https://github.com/yushangxiao/claude2api.git
- cd claude2api
- # 构建二进制文件
- go build -o claude2api .
- # 运行服务
- export SESSIONS=sk-ant-sid01-xxxx,sk-ant-sid01-yyyy
- export ADDRESS=0.0.0.0:8080
- export APIKEY=123
- ……
+```bash
+# Clone the repository
+git clone https://github.com/yushangxiao/claude2api.git
+cd claude2api
+cp .env.example .env  
+vim .env  
+# Build the binary
+go build -o claude2api .
 
- ./claude2api
- ```
+./claude2api
+```
  
  ## ⚙️ 配置
  | 环境变量 | 描述 | 默认值 |
