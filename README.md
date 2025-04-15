@@ -67,7 +67,7 @@ services:
       - ENABLE_MIRROR_API=false
       - MIRROR_API_PREFIX=/mirror
     restart: unless-stopped
-    
+
 ```
 
 Then run:
@@ -105,6 +105,41 @@ export APIKEY=123
 ```
 
 ## ⚙️ Configuration
+
+### YAML Configuration
+
+You can configure Claude2API using a `config.yaml` file in the application's root directory. If this file exists, it will be used instead of environment variables.
+
+Example `config.yaml`:
+
+```yaml
+# Sessions configuration
+sessions:
+  - sessionKey: "sk-ant-sid01-xxxx"
+    orgID: ""
+  - sessionKey: "sk-ant-sid01-yyyy"
+    orgID: ""
+
+# Server address
+address: "0.0.0.0:8080"
+
+# API authentication key
+apiKey: "123"
+
+# Other configuration options...
+chatDelete: true
+maxChatHistoryLength: 10000
+noRolePrefix: false
+promptDisableArtifacts: false
+enableMirrorApi: false
+mirrorApiPrefix: ""
+```
+
+A sample configuration file is provided as `config.yaml.example` in the repository.
+
+### Environment Variables
+
+If `config.yaml` doesn't exist, the application will use environment variables for configuration:
 
 | Environment Variable | Description | Default |
 |----------------------|-------------|---------|
