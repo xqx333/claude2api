@@ -77,22 +77,52 @@ Api支持访问格式为 openai 格式
  注意：在Hugging Face中，/v1可能被屏蔽，您可以使用/hf/v1代替。
  
  ### 直接部署
- ```bash
- # 克隆仓库
- git clone https://github.com/yushangxiao/claude2api.git
- cd claude2api
- # 构建二进制文件
- go build -o claude2api .
- # 运行服务
- export SESSIONS=sk-ant-sid01-xxxx,sk-ant-sid01-yyyy
- export ADDRESS=0.0.0.0:8080
- export APIKEY=123
- ……
+```bash
+# Clone the repository
+git clone https://github.com/yushangxiao/claude2api.git
+cd claude2api
+cp .env.example .env  
+vim .env  
+# Build the binary
+go build -o claude2api .
 
- ./claude2api
- ```
+./claude2api
+```
  
  ## ⚙️ 配置
+ 
+### YAML 配置
+
+你可以在应用程序的根目录下使用 config.yaml 文件来配置 Claude2API。如果此文件存在，将会使用它而不是环境变量。
+
+config.yaml 示例：
+
+```yaml
+# Sessions configuration
+sessions:
+  - sessionKey: "sk-ant-sid01-xxxx"
+    orgID: ""
+  - sessionKey: "sk-ant-sid01-yyyy"
+    orgID: ""
+
+# Server address
+address: "0.0.0.0:8080"
+
+# API authentication key
+apiKey: "123"
+
+# Other configuration options...
+chatDelete: true
+maxChatHistoryLength: 10000
+noRolePrefix: false
+promptDisableArtifacts: false
+enableMirrorApi: false
+mirrorApiPrefix: ""
+```
+
+仓库中提供了一个名为 config.yaml.example 的示例配置文件。
+
+ 
  | 环境变量 | 描述 | 默认值 |
  |----------------------|-------------|---------|
  | `SESSIONS` | 逗号分隔的Claude API会话密钥列表 | 必填 |
