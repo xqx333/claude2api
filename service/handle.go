@@ -134,10 +134,6 @@ func MirrorChatHandler(c *gin.Context) {
 
 func parseAndValidateRequest(c *gin.Context) (*model.ChatCompletionRequest, error) {
 	var req model.ChatCompletionRequest
-	defaultStream := true
-	req = model.ChatCompletionRequest{
-		Stream: defaultStream,
-	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
