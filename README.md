@@ -228,4 +228,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=yushangxiao/claude2api&type=Date)](https://www.star-history.com/#yushangxiao/claude2api&Date)
+
 Made with ❤️ by [yushangxiao](https://github.com/yushangxiao)
