@@ -201,7 +201,10 @@ mirrorApiPrefix: ""
  ## 🙏 致谢
  - 感谢[Anthropic](https://www.anthropic.com/)创建Claude
  - 感谢Go社区提供的优秀生态系统
- 
+
+ ## 🎁 项目支持
+
+如果你觉得这个项目对你有帮助，可以考虑通过 [爱发电](https://afdian.com/a/iscoker) 支持我😘
  ---
  由[yushangxiao](https://github.com/yushangxiao)用❤️制作
 </details
