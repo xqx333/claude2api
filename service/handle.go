@@ -25,6 +25,30 @@ func HealthCheckHandler(c *gin.Context) {
 	})
 }
 
+func MoudlesHandler(c *gin.Context) {
+	models := []map[string]interface{}{
+		{"id": "claude-3-7-sonnet-20250219"},
+		{"id": "claude-sonnet-4-20250514"},
+		{"id": "claude-opus-4-20250514"},
+	}
+
+	extendedModels := make([]map[string]interface{}, 0, len(models)*2)
+	for _, m := range models {
+		// 保留原有 id
+		extendedModels = append(extendedModels, m)
+		// 追加 -think 版本
+		if id, ok := m["id"].(string); ok {
+			extendedModels = append(extendedModels, map[string]interface{}{
+				"id": id + "-think",
+			})
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": extendedModels,
+	})
+}
+
 // ChatCompletionsHandler handles the chat completions endpoint
 func ChatCompletionsHandler(c *gin.Context) {
 	useMirror, exist := c.Get("UseMirrorApi")
@@ -76,16 +100,6 @@ func ChatCompletionsHandler(c *gin.Context) {
 	logger.Error("Failed for all retries")
 	c.JSON(http.StatusInternalServerError, ErrorResponse{
 		Error: "Failed to process request after multiple attempts"})
-}
-
-func MoudlesHandler(c *gin.Context) {
-	models := []map[string]interface{}{
-		{"id": "claude-3-7-sonnet-20250219"},
-		{"id": "claude-3-7-sonnet-20250219-think"},
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"data": models,
-	})
 }
 
 func MirrorChatHandler(c *gin.Context) {
@@ -177,7 +191,7 @@ func extractSessionFromAuthHeader(c *gin.Context) (config.SessionInfo, error) {
 
 func handleChatRequest(c *gin.Context, session config.SessionInfo, model string, processor *utils.ChatRequestProcessor, stream bool) bool {
 	// Initialize the Claude client
-	claudeClient := core.NewClient(session.SessionKey, config.ConfigInstance.Proxy)
+	claudeClient := core.NewClient(session.SessionKey, config.ConfigInstance.Proxy, model)
 
 	// Get org ID if not already set
 	if session.OrgID == "" {
@@ -209,7 +223,7 @@ func handleChatRequest(c *gin.Context, session config.SessionInfo, model string,
 	}
 
 	// Create conversation
-	conversationID, err := claudeClient.CreateConversation(model)
+	conversationID, err := claudeClient.CreateConversation()
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to create conversation: %v", err))
 		return false

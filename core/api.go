@@ -22,6 +22,7 @@ type Client struct {
 	SessionKey   string
 	orgID        string
 	client       *req.Client
+	model        string
 	defaultAttrs map[string]interface{}
 }
 
@@ -38,7 +39,7 @@ type ResponseEvent struct {
 	} `json:"error"`
 }
 
-func NewClient(sessionKey string, proxy string) *Client {
+func NewClient(sessionKey string, proxy string, model string) *Client {
 	client := req.C().ImpersonateChrome().SetTimeout(time.Minute * 5)
 	client.Transport.SetResponseHeaderTimeout(time.Second * 10)
 	if proxy != "" {
@@ -65,6 +66,7 @@ func NewClient(sessionKey string, proxy string) *Client {
 	c := &Client{
 		SessionKey: sessionKey,
 		client:     client,
+		model:      model,
 		defaultAttrs: map[string]interface{}{
 			"personalized_styles": []map[string]interface{}{
 				{
@@ -83,6 +85,8 @@ func NewClient(sessionKey string, proxy string) *Client {
 					"type": "web_search_v0",
 					"name": "web_search",
 				},
+				{"type": "artifacts_v0", "name": "artifacts"},
+				{"type": "repl_v0", "name": "repl"},
 			},
 			"parent_message_uuid": "00000000-0000-4000-8000-000000000000",
 			"attachments":         []interface{}{},
@@ -137,22 +141,29 @@ func (c *Client) GetOrgID() (string, error) {
 }
 
 // CreateConversation creates a new conversation and returns its UUID
-func (c *Client) CreateConversation(model string) (string, error) {
+func (c *Client) CreateConversation() (string, error) {
 	if c.orgID == "" {
 		return "", errors.New("organization ID not set")
 	}
 	url := fmt.Sprintf("https://claude.ai/api/organizations/%s/chat_conversations", c.orgID)
 	// 如果以-think结尾
+	if strings.HasSuffix(c.model, "-think") {
+		c.model = strings.TrimSuffix(c.model, "-think")
+		c.UpdateUserSetting("paprika_mode", "extended")
+	} else {
+		c.UpdateUserSetting("paprika_mode", nil)
+	}
 	requestBody := map[string]interface{}{
-		"model":                            model,
+		"model":                            c.model,
 		"uuid":                             uuid.New().String(),
 		"name":                             "",
 		"include_conversation_preferences": true,
 	}
-	if len(model) > 6 && model[len(model)-6:] == "-think" {
-		requestBody["paprika_mode"] = "extended"
-		requestBody["model"] = model[:len(model)-6]
+	if c.model == "claude-sonnet-4-20250514" {
+		// 删除model
+		delete(requestBody, "model")
 	}
+
 	resp, err := c.client.R().
 		SetHeader("referer", "https://claude.ai/new").
 		SetBody(requestBody).
@@ -168,6 +179,7 @@ func (c *Client) CreateConversation(model string) (string, error) {
 	if err := json.Unmarshal(resp.Bytes(), &result); err != nil {
 		return "", fmt.Errorf("failed to parse response: %w", err)
 	}
+	logger.Info(fmt.Sprintf("create conversation response: %s", resp.String()))
 	uuid, ok := result["uuid"].(string)
 	if !ok {
 		return "", errors.New("conversation UUID not found in response")
@@ -185,6 +197,9 @@ func (c *Client) SendMessage(conversationID string, message string, stream bool,
 	// Create request body with default attributes
 	requestBody := c.defaultAttrs
 	requestBody["prompt"] = message
+	if c.model != "claude-sonnet-4-20250514" {
+		requestBody["model"] = c.model
+	}
 	// Set up streaming response
 	resp, err := c.client.R().DisableAutoReadResponse().
 		SetHeader("referer", fmt.Sprintf("https://claude.ai/chat/%s", conversationID)).
@@ -260,7 +275,7 @@ func (c *Client) HandleResponse(body io.ReadCloser, stream bool, gc *gin.Context
 			if event.Delta.Type == "thinking_delta" {
 				res_text := event.Delta.THINKING
 				if !thinkingShown {
-					res_text = "<think>" + res_text
+					res_text = "<think> " + res_text
 					thinkingShown = true
 				}
 				res_all_text += res_text
@@ -417,4 +432,76 @@ func (c *Client) SetBigContext(context string) {
 		},
 	}
 
+}
+
+// / UpdateUserSetting updates a single user setting on Claude.ai while preserving all other settings
+func (c *Client) UpdateUserSetting(key string, value interface{}) error {
+	url := "https://claude.ai/api/account?statsig_hashing_algorithm=djb2"
+
+	// Default settings structure with all possible fields
+	settings := map[string]interface{}{
+		"input_menu_pinned_items":          nil,
+		"has_seen_mm_examples":             nil,
+		"has_seen_starter_prompts":         nil,
+		"has_started_claudeai_onboarding":  true,
+		"has_finished_claudeai_onboarding": true,
+		"dismissed_claudeai_banners":       []interface{}{},
+		"dismissed_artifacts_announcement": nil,
+		"preview_feature_uses_artifacts":   nil,
+		"preview_feature_uses_latex":       nil,
+		"preview_feature_uses_citations":   nil,
+		"preview_feature_uses_harmony":     nil,
+		"enabled_artifacts_attachments":    true,
+		"enabled_turmeric":                 nil,
+		"enable_chat_suggestions":          nil,
+		"dismissed_artifact_feedback_form": nil,
+		"enabled_mm_pdfs":                  nil,
+		"enabled_gdrive":                   nil,
+		"enabled_bananagrams":              nil,
+		"enabled_gdrive_indexing":          nil,
+		"enabled_web_search":               true,
+		"enabled_compass":                  nil,
+		"enabled_sourdough":                nil,
+		"enabled_foccacia":                 nil,
+		"dismissed_claude_code_spotlight":  nil,
+		"enabled_geolocation":              nil,
+		"enabled_mcp_tools":                nil,
+		"paprika_mode":                     nil,
+		"enabled_monkeys_in_a_barrel":      nil,
+	}
+
+	// Update the specified setting
+	if _, exists := settings[key]; exists {
+		settings[key] = value
+		logger.Info(fmt.Sprintf("Updating setting %s to %v", key, value))
+	} else {
+		return fmt.Errorf("unknown setting key: %s", key)
+	}
+
+	// Create request body
+	requestBody := map[string]interface{}{
+		"settings": settings,
+	}
+
+	// Make the request
+	resp, err := c.client.R().
+		SetHeader("referer", "https://claude.ai/new").
+		SetHeader("origin", "https://claude.ai").
+		SetHeader("anthropic-client-platform", "web_claude_ai").
+		SetHeader("cache-control", "no-cache").
+		SetHeader("pragma", "no-cache").
+		SetHeader("priority", "u=1, i").
+		SetBody(requestBody).
+		Put(url)
+
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, resp.String())
+	}
+
+	logger.Info(fmt.Sprintf("Successfully updated user setting %s: %s", key, resp.String()))
+	return nil
 }

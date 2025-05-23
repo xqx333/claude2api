@@ -6,6 +6,9 @@ The API supports access in the OpenAI format.
 [![License](https://img.shields.io/github/license/yushangxiao/claude2api)](LICENSE)
 |[中文](https://github.com/yushangxiao/claude2api/blob/main/docs/chinses.md)
 
+
+NOTICE: ONLY PRO USER CAN USE ALL MODELS , FREE USER ONLY CAN USE claude-sonnet-4-20250514
+
 ## ✨ Features
 
 - 🖼️ **Image Recognition** - Send images to Claude for analysis
