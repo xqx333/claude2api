@@ -230,5 +230,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - The Go community for the amazing ecosystem
 
 ---
+ ## 🎁 Support
+
+If you find this project helpful, consider supporting me on [Afdian](https://afdian.com/a/iscoker)  😘
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=yushangxiao/claude2api&type=Date)](https://www.star-history.com/#yushangxiao/claude2api&Date)
 
 Made with ❤️ by [yushangxiao](https://github.com/yushangxiao)
