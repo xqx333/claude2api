@@ -8,6 +8,8 @@ Api支持访问格式为 openai 格式
 [![License](https://img.shields.io/github/license/yushangxiao/claude2api)](LICENSE)
 |[英文](https://github.com/yushangxiao/claude2api/edit/main/README.md)
 
+提醒： 只有 PRO 用户可以使用所有模型。免费用户只能使用 claude-sonnet-4-20250514
+
 ## ✨ 特性
 - 🖼️ **图像识别** - 发送图像给Claude进行分析
 - 📝 **自动对话管理** - 对话可在使用后自动删除
