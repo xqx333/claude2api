@@ -506,6 +506,6 @@ func (c *Client) UpdateUserSetting(key string, value interface{}) error {
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, resp.String())
 	}
 
-	logger.Info(fmt.Sprintf("Successfully updated user setting %s: %s", key, resp.String()))
+	// logger.Info(fmt.Sprintf("Successfully updated user setting %s: %s", key, resp.String()))
 	return nil
 }
