@@ -149,9 +149,13 @@ func (c *Client) CreateConversation() (string, error) {
 	// 如果以-think结尾
 	if strings.HasSuffix(c.model, "-think") {
 		c.model = strings.TrimSuffix(c.model, "-think")
-		c.UpdateUserSetting("paprika_mode", "extended")
+		if err := c.UpdateUserSetting("paprika_mode", "extended"); err != nil {
+			logger.Error(fmt.Sprintf("Failed to update paprika_mode: %v", err))
+		}
 	} else {
-		c.UpdateUserSetting("paprika_mode", nil)
+		if err := c.UpdateUserSetting("paprika_mode", nil); err != nil {
+			logger.Error(fmt.Sprintf("Failed to update paprika_mode: %v", err))
+		}
 	}
 	requestBody := map[string]interface{}{
 		"model":                            c.model,
