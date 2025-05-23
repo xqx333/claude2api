@@ -33,6 +33,8 @@ type ResponseEvent struct {
 		Type     string `json:"type"`
 		Text     string `json:"text"`
 		THINKING string `json:"thinking"`
+		// partial_json
+		PartialJSON string `json:"partial_json"`
 	} `json:"delta"`
 	Error struct {
 		Message string `json:"message"`
@@ -242,6 +244,7 @@ func (c *Client) HandleResponse(body io.ReadCloser, stream bool, gc *gin.Context
 	// Keep track of the full response for the final message
 	thinkingShown := false
 	res_all_text := ""
+	partial_json_shown := false
 	for scanner.Scan() {
 		select {
 		case <-clientDone:
@@ -252,7 +255,7 @@ func (c *Client) HandleResponse(body io.ReadCloser, stream bool, gc *gin.Context
 			// 继续处理响应
 		}
 		line := scanner.Text()
-		// logger.Info(fmt.Sprintf("Claude SSE line: %s", line))
+		logger.Info(fmt.Sprintf("Claude SSE line: %s", line))
 		if !strings.HasPrefix(line, "data: ") {
 			continue
 		}
@@ -269,6 +272,10 @@ func (c *Client) HandleResponse(body io.ReadCloser, stream bool, gc *gin.Context
 					res_text = "</think>\n" + res_text
 					thinkingShown = false
 				}
+				if partial_json_shown {
+					res_text = "\n```\n" + res_text
+					partial_json_shown = false
+				}
 				res_all_text += res_text
 				if !stream {
 					continue
@@ -281,6 +288,19 @@ func (c *Client) HandleResponse(body io.ReadCloser, stream bool, gc *gin.Context
 				if !thinkingShown {
 					res_text = "<think> " + res_text
 					thinkingShown = true
+				}
+				res_all_text += res_text
+				if !stream {
+					continue
+				}
+				model.ReturnOpenAIResponse(res_text, stream, gc)
+				continue
+			}
+			if event.Delta.Type == "input_json_delta" {
+				res_text := event.Delta.PartialJSON
+				if !partial_json_shown {
+					res_text = "\n```\n " + res_text
+					partial_json_shown = true
 				}
 				res_all_text += res_text
 				if !stream {
