@@ -502,7 +502,7 @@ func (c *Client) UpdateUserSetting(key string, value interface{}) error {
 		return fmt.Errorf("request failed: %w", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != 202 {
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, resp.String())
 	}
 
