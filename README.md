@@ -150,7 +150,7 @@ If `config.yaml` doesn't exist, the application will use environment variables f
 | `NO_ROLE_PREFIX` | Do not add role in every message | `false` |
 | `PROMPT_DISABLE_ARTIFACTS` | Add Prompt try to disable Artifacts | `false` |
 | `ENABLE_MIRROR_API` | Enable direct use sk-ant-* as key | `false` |
-| `MIRROR_API_PREFIX` | Add Prefix to protect Mirror，required when ENABLE_MIRROR_API is true | `` |
+| `MIRROR_API_PREFIX` | Add Prefix to protect Mirror，required when ENABLE_MIRROR_API is true,starting with '/' | `` |
 
 
 ## 📝 API Usage
