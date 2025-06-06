@@ -41,12 +41,13 @@ type ResponseEvent struct {
 	} `json:"error"`
 }
 
-func NewClient(sessionKey string, proxy string, model string) *Client {
+func NewClient(sessionKey string, proxies []string, model string) *Client {
 	client := req.C().ImpersonateChrome().SetTimeout(time.Minute * 5)
 	client.Transport.SetResponseHeaderTimeout(time.Second * 10)
-	if proxy != "" {
-		client.SetProxyURL(proxy)
-	}
+	p := utils.SelectProxyBySessionKey(sessionKey, proxies)
+	if p != "" {
+		client.SetProxyURL(p)
+	}	
 	// Set common headers
 	headers := map[string]string{
 		"accept":                    "text/event-stream, text/event-stream",
