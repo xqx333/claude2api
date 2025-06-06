@@ -234,7 +234,7 @@ func init() {
 	}
 	ConfigInstance = LoadConfig()
 	// 过滤不可用代理并写回配置
-+    	ConfigInstance.Proxies = utils.CheckAndFilterProxies(ConfigInstance.Proxies)
++    	ConfigInstance.Proxies = CheckAndFilterProxies(ConfigInstance.Proxies)
 	logger.Info("Loaded config:")
 	logger.Info(fmt.Sprintf("Max Retry count: %d", ConfigInstance.RetryCount))
 	logger.Info(fmt.Sprintf("Proxies: %v", ConfigInstance.Proxies))
