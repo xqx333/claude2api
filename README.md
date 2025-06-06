@@ -144,7 +144,7 @@ If `config.yaml` doesn't exist, the application will use environment variables f
 | `SESSIONS` | Comma-separated list of Claude API session keys | Required |
 | `ADDRESS` | Server address and port | `0.0.0.0:8080` |
 | `APIKEY` | API key for authentication | Required |
-| `PROXY` | HTTP proxy URL | Optional |
+| `PROXIES` | HTTP proxy URL Comma-separated| Optional |
 | `CHAT_DELETE` | Whether to delete chat sessions after use | `true` |
 | `MAX_CHAT_HISTORY_LENGTH` | Exceeding will text to file | `10000` |
 | `NO_ROLE_PREFIX` | Do not add role in every message | `false` |
