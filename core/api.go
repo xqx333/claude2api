@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"claude2api/logger"
 	"claude2api/model"
+	"claude2api/config"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -44,7 +45,7 @@ type ResponseEvent struct {
 func NewClient(sessionKey string, proxies []string, model string) *Client {
 	client := req.C().ImpersonateChrome().SetTimeout(time.Minute * 5)
 	client.Transport.SetResponseHeaderTimeout(time.Second * 10)
-	p := utils.SelectProxyBySessionKey(sessionKey, proxies)
+	p := config.SelectProxyBySessionKey(sessionKey, proxies)
 	if p != "" {
 		client.SetProxyURL(p)
 	}	
