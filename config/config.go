@@ -45,7 +45,7 @@ type Config struct {
 func parseProxiesEnv() []string {
     env := strings.TrimSpace(os.Getenv("PROXIES"))
     if env == "" {
-        return nil
+        return []string{}
     }
     var out []string
     for _, p := range strings.Split(env, ",") {
