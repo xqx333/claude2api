@@ -244,7 +244,6 @@ func init() {
 	}
 	logger.Info(fmt.Sprintf("Address: %s", ConfigInstance.Address))
 	logger.Info(fmt.Sprintf("APIKey: %s", ConfigInstance.APIKey))
-	logger.Info(fmt.Sprintf("Proxy: %s", ConfigInstance.Proxy))
 	logger.Info(fmt.Sprintf("ChatDelete: %t", ConfigInstance.ChatDelete))
 	logger.Info(fmt.Sprintf("MaxChatHistoryLength: %d", ConfigInstance.MaxChatHistoryLength))
 	logger.Info(fmt.Sprintf("NoRolePrefix: %t", ConfigInstance.NoRolePrefix))
