@@ -191,7 +191,7 @@ func extractSessionFromAuthHeader(c *gin.Context) (config.SessionInfo, error) {
 
 func handleChatRequest(c *gin.Context, session config.SessionInfo, model string, processor *utils.ChatRequestProcessor, stream bool) bool {
 	// Initialize the Claude client
-	claudeClient := core.NewClient(session.SessionKey, config.ConfigInstance.Proxy, model)
+	claudeClient := core.NewClient(session.SessionKey, config.ConfigInstance.Proxies, model)
 
 	// Get org ID if not already set
 	if session.OrgID == "" {
