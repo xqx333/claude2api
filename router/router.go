@@ -11,11 +11,6 @@ import (
 func SetupRoutes(r *gin.Engine) {
 	// Apply middleware
 	r.Use(middleware.CORSMiddleware())
-
-	if config.ConfigInstance.EnableMirrorApi {
-		r.POST(config.ConfigInstance.MirrorApiPrefix+"/v1/chat/completions", service.MirrorChatHandler)
-		r.GET(config.ConfigInstance.MirrorApiPrefix+"/v1/models", service.MoudlesHandler)
-	}
 	
 	r.Use(middleware.AuthMiddleware())
 
@@ -26,6 +21,11 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/v1/chat/completions", service.ChatCompletionsHandler)
 	r.GET("/v1/models", service.MoudlesHandler)
 
+	
+	if config.ConfigInstance.EnableMirrorApi {
+		r.POST(config.ConfigInstance.MirrorApiPrefix+"/v1/chat/completions", service.MirrorChatHandler)
+		r.GET(config.ConfigInstance.MirrorApiPrefix+"/v1/models", service.MoudlesHandler)
+	}
 
 
 	// HuggingFace compatible routes
