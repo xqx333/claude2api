@@ -136,7 +136,7 @@ mirrorApiPrefix: ""
  | `NO_ROLE_PREFIX` |不在每条消息前添加角色 | `false` |
  | `PROMPT_DISABLE_ARTIFACTS` | 添加提示词尝试禁用 ARTIFACTS| `false` |
  | `ENABLE_MIRROR_API` | 允许直接使用 sk-ant-* 作为 key 使用 | `false` |
- | `MIRROR_API_PREFIX` | 对直接使用增加接口前缀，开启ENABLE_MIRROR_API时必填 | `` |
+ | `MIRROR_API_PREFIX` | 对直接使用增加接口前缀，开启ENABLE_MIRROR_API时必填,必须以'/'开头 | `` |
  
  ## 📝 API使用
  ### 认证
