@@ -2,7 +2,6 @@ package config
 
 import (
 	"claude2api/logger"
-	"claude2api/utils"
 	"fmt"
 	"math/rand"
 	"os"
