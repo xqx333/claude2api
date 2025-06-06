@@ -40,6 +40,22 @@ type Config struct {
 	RwMutx                 sync.RWMutex  `yaml:"-"` // 不从YAML加载
 }
 
+
+// 解析 Proxies 格式的环境变量
+func parseProxiesEnv() []string {
+    env := strings.TrimSpace(os.Getenv("PROXIES"))
+    if env == "" {
+        return nil
+    }
+    var out []string
+    for _, p := range strings.Split(env, ",") {
+        if p = strings.TrimSpace(p); p != "" {
+            out = append(out, p)
+        }
+    }
+    return out
+}
+
 // 解析 SESSION 格式的环境变量
 func parseSessionEnv(envValue string) (int, []SessionInfo) {
 	if envValue == "" {
@@ -167,16 +183,7 @@ func loadConfigFromEnv() *Config {
 		// 设置 API 认证密钥
 		APIKey: os.Getenv("APIKEY"),
 		// 设置代理地址
-		Proxies: func() []string {
-		+        var out []string
-		+        for _, p := range strings.Split(os.Getenv("PROXIES"), ",") {
-		+            p = strings.TrimSpace(p)
-		+            if p != "" {
-		+                out = append(out, p)
-		+            }
-		+        }
-		+        return out
-		+    }(),
+		Proxies: parseProxiesEnv(),
 		// 自动删除聊天
 		ChatDelete: os.Getenv("CHAT_DELETE") != "false",
 		// 设置最大聊天历史长度
