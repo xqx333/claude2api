@@ -2,7 +2,6 @@ package config
 
 import (
     "crypto/sha256"
-    "fmt"
     "strings"
     "time"
 
