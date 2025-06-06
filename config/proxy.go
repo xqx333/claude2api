@@ -43,5 +43,6 @@ func SelectProxyBySessionKey(sessionKey string, proxies []string) string {
     }
     sum := sha256.Sum256([]byte(sessionKey))
     idx := int(sum[0]) % len(proxies)
+    logger.Info("SelectProxy: sessionKey=%s -> proxyIdx=%d (%s)",sessionKey, idx, proxies[idx])
     return proxies[idx]
 }
