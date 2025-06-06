@@ -10,7 +10,7 @@ import (
 // AuthMiddleware initializes the Claude client from the request header
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if config.ConfigInstance.EnableMirrorApi && strings.HasPrefix(c.Request.URL.Path, config.ConfigInstance.MirrorApiPrefix) {
+		if config.ConfigInstance.EnableMirrorApi && strings.HasPrefix(c.Request.URL.Path, '/'+config.ConfigInstance.MirrorApiPrefix) {
 			c.Set("UseMirrorApi", true)
 			c.Next()
 			return
