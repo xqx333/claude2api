@@ -130,7 +130,7 @@ mirrorApiPrefix: ""
  | `SESSIONS` | 逗号分隔的Claude API会话密钥列表 | 必填 |
  | `ADDRESS` | 服务器地址和端口 | `0.0.0.0:8080` |
  | `APIKEY` | 用于认证的API密钥 | 必填 |
- | `PROXY` | HTTP代理URL | 可选 |
+ | `PROXIES` | HTTP代理URL 逗号分隔 | 可选 |
  | `CHAT_DELETE` | 是否在使用后删除聊天会话 | `true` |
  | `MAX_CHAT_HISTORY_LENGTH` | 超出此长度将文本转为文件 | `10000` |
  | `NO_ROLE_PREFIX` |不在每条消息前添加角色 | `false` |
