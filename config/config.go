@@ -2,6 +2,7 @@ package config
 
 import (
 	"claude2api/logger"
+	"claude2api/utils"
 	"fmt"
 	"math/rand"
 	"os"
@@ -29,7 +30,7 @@ type Config struct {
 	Sessions               []SessionInfo `yaml:"sessions"`
 	Address                string        `yaml:"address"`
 	APIKey                 string        `yaml:"apiKey"`
-	Proxy                  string        `yaml:"proxy"`
+	Proxies                []string      `yaml:"proxies"` // NEW: list of proxies
 	ChatDelete             bool          `yaml:"chatDelete"`
 	MaxChatHistoryLength   int           `yaml:"maxChatHistoryLength"`
 	RetryCount             int           `yaml:"retryCount"`
@@ -72,7 +73,7 @@ func parseSessionEnv(envValue string) (int, []SessionInfo) {
 	return retryCount, sessions
 }
 
-// 根据模型选择合适的 session
+// 根据索引选择合适的 session
 func (c *Config) GetSessionForModel(idx int) (SessionInfo, error) {
 	if len(c.Sessions) == 0 || idx < 0 || idx >= len(c.Sessions) {
 		return SessionInfo{}, fmt.Errorf("invalid session index: %d", idx)
@@ -167,7 +168,16 @@ func loadConfigFromEnv() *Config {
 		// 设置 API 认证密钥
 		APIKey: os.Getenv("APIKEY"),
 		// 设置代理地址
-		Proxy: os.Getenv("PROXY"),
+		Proxies: func() []string {
+		+        var out []string
+		+        for _, p := range strings.Split(os.Getenv("PROXIES"), ",") {
+		+            p = strings.TrimSpace(p)
+		+            if p != "" {
+		+                out = append(out, p)
+		+            }
+		+        }
+		+        return out
+		+    }(),
 		// 自动删除聊天
 		ChatDelete: os.Getenv("CHAT_DELETE") != "false",
 		// 设置最大聊天历史长度
@@ -224,8 +234,11 @@ func init() {
 		Mutex: sync.Mutex{},
 	}
 	ConfigInstance = LoadConfig()
+	// 过滤不可用代理并写回配置
++    	ConfigInstance.Proxies = utils.CheckAndFilterProxies(ConfigInstance.Proxies)
 	logger.Info("Loaded config:")
 	logger.Info(fmt.Sprintf("Max Retry count: %d", ConfigInstance.RetryCount))
+	logger.Info(fmt.Sprintf("Proxies: %v", ConfigInstance.Proxies))
 	for _, session := range ConfigInstance.Sessions {
 		logger.Info(fmt.Sprintf("Session: %s, OrgID: %s", session.SessionKey, session.OrgID))
 	}
