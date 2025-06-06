@@ -17,7 +17,7 @@ address: "0.0.0.0:8080"
 apiKey: "your_api_key"
 
 # Proxy address (optional)
-proxy: ""
+proxies: ['sk-','sk-']
 
 # Chat deletion setting (default: true)
 chatDelete: true
